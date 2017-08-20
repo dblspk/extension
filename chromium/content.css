@@ -1,27 +1,20 @@
-html {
-	max-height: 40rem;
-	margin: 0;
+:host {
 	font-family: sans-serif;
-	font-size: 100%;
+	font-size: 16px;
 	color: white;
-	background-color: #222;
 }
 
-label,
-nav > a,
-h1,
-button,
-#tip {
-	cursor: default;
-	-webkit-user-select: none;
-	   -moz-user-select: none;
-	    -ms-user-select: none;
-	        user-select: none;
+:host > div {
+	position: fixed;
+	contain: content;
+	z-index: 2147483647;
+	top: 2em;
+	right: 2em;
 }
 
 h1,
 .row {
-	width: 24rem;
+	width: 24em;
 	margin: 0 auto;
 }
 
@@ -29,12 +22,12 @@ h1 {
 	margin: 0 auto;
 	font-size: 150%;
 	font-weight: 500;
-	text-shadow: 0 0 0.2rem black;
+	text-shadow: 0 0 0.2em black;
 	color: #AAA;
 }
 
 .row {
-	margin: 0.5rem auto;
+	margin: 0.5em auto;
 }
 
 button {
@@ -46,16 +39,16 @@ button {
 .button,
 label[for=files] {
 	float: right;
-	height: 1.8rem;
-	line-height: 1.8rem;
-	width: 4rem;
-	font-size: 1rem;
+	height: 1.8em;
+	line-height: 1.8em;
+	width: 4em;
+	font-size: 1em;
 	font-weight: bold;
 	text-align: center;
 	color: #CCC;
 	background-color: #444;
-	border-radius: 0.2rem;
-	box-shadow: 0 0 0.2rem black;
+	border-radius: 0.2em;
+	box-shadow: 0 0 0.2em black;
 	cursor: pointer;
 }
 
@@ -77,27 +70,27 @@ textarea,
 .text-div,
 .embed-div {
 	height: auto;
-	width: 19.5rem;
-	padding: 0.12rem;
+	width: 19.5em;
+	padding: 0.12em;
 	margin: 0;
 	box-sizing: border-box;
-	font-size: 1rem;
+	font-size: 1em;
 	color: white;
-	border: 0.12rem solid #444;
+	border: 0.12em solid #444;
 }
 
 textarea {
-	height: 1.8rem;
+	height: 1.8em;
 	font-family: sans-serif;
 	vertical-align: top;
 	background-color: #111;
-	box-shadow: 0 0 0.4rem black inset, 0 0 0.2rem black;
+	box-shadow: 0 0 0.4em black inset, 0 0 0.2em black;
 	resize: none;
 }
 
 .text-div {
-	min-height: 1.8rem;
-	margin-top: 0.5rem;
+	min-height: 1.8em;
+	margin-top: 0.5em;
 	word-wrap: break-word;
 	white-space: pre-wrap;
 	background-color: #111;
@@ -107,14 +100,14 @@ textarea {
 
 #out-plain ~ .text-div {
 	position: relative;
-	padding-right: 1rem;
+	padding-right: 1em;
 }
 
 #out-cover,
 #in-cipher {
 	color: black;
 	background-color: #DDD;
-	box-shadow: 0 0 0.4rem #888 inset, 0 0 0.2rem black;
+	box-shadow: 0 0 0.4em #888 inset, 0 0 0.2em black;
 }
 
 #in-plain:first-child {
@@ -124,7 +117,7 @@ textarea {
 .embed-div {
 	background-color: #1A1A1A;
 	border: none;
-	box-shadow: 0 0 0.4rem black inset;
+	box-shadow: 0 0 0.4em black inset;
 }
 
 textarea:hover,
@@ -160,8 +153,8 @@ textarea.copied {
 
 .notify {
 	overflow: hidden;
-	height: 1.1rem;
-	width: 19.5rem;
+	height: 1.1em;
+	width: 19.5em;
 	margin-top: -1px;
 	text-align: center;
 	font-weight: bold;
@@ -191,7 +184,7 @@ textarea.copied + .copied-div {
 }
 
 ::-webkit-scrollbar {
-	width: 0.5rem;
+	width: 0.5em;
 	min-width: 12px;
 	background-color: #333;
 }
@@ -228,8 +221,8 @@ a:hover {
 	position: absolute;
 	top: 0;
 	right: 0;
-	line-height: 1rem;
-	width: 1rem;
+	line-height: 1em;
+	width: 1em;
 	font-size: 150%;
 	color: #AAA;
 	background-color: transparent;
@@ -247,12 +240,12 @@ a:hover {
 
 .file-download {
 	display: inline-block;
-	padding: 0.2rem;
-	margin: 0.2rem;
+	padding: 0.2em;
+	margin: 0.2em;
 	color: white;
 	background-color: #06C;
-	border-radius: 0.2rem;
-	box-shadow: 0 0 0.2rem black;
+	border-radius: 0.2em;
+	box-shadow: 0 0 0.2em black;
 }
 
 .file-download:hover {
@@ -268,7 +261,7 @@ a:hover {
 .embed {
 	display: block;
 	width: 100%;
-	padding: 0.1rem;
+	padding: 0.1em;
 	box-sizing: border-box;
 }
 
@@ -281,9 +274,9 @@ a:hover {
 	position: absolute;
 	top: 50%;
 	left: 50%;
-	line-height: 3rem;
-	width: 3rem;
-	margin: -1.5rem 0 0 -1.5rem;
+	line-height: 3em;
+	width: 3em;
+	margin: -1.5em 0 0 -1.5em;
 	font-family: sans-serif, 'Segoe UI Symbol', EmojiSymbols;
 	font-size: 250%;
 	text-align: center;
@@ -301,19 +294,19 @@ a:hover {
 }
 
 iframe.embed {
-	height: 14.11875rem;
+	height: 14.11875em;
 	border: none;
 }
 
 #drop-target::before {
 	position: fixed;
-	top: 2rem;
-	bottom: 2rem;
-	left: 2rem;
-	right: 2rem;
-	line-height: calc(100vh - 6rem);
-	font-size: 2rem;
+	top: 2em;
+	bottom: 2em;
+	left: 2em;
+	right: 2em;
+	line-height: calc(100vh - 6em);
+	font-size: 2em;
 	text-align: center;
-	border: 1rem dashed rgba(255, 255, 255, 0.5);
+	border: 1em dashed rgba(255, 255, 255, 0.5);
 	content: 'Drop files to encode';
 }
