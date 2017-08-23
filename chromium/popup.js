@@ -99,7 +99,7 @@ function outputText(str, crcMatch) {
 		'>': '&gt;'
 	};
 
-	textDiv.innerHTML = autolinker.link(str);
+	textDiv.innerHTML = autolinker.link(str.replace(/[&<>]/g, c => references[c]));
 
 	if (!crcMatch)
 		outputError(textDiv, 'CRC mismatch');
@@ -113,7 +113,7 @@ function outputFile(data, crcMatch) {
 	textDiv.textContent = name;
 	const info = document.createElement('p');
 	info.className = 'file-info';
-	info.textContent = (type || 'unknown') + ', ' + size + ' bytes';
+	info.textContent = (type || 'unknown') + ', ' + (size / 1024).toFixed(2) + ' KB';
 	textDiv.appendChild(info);
 	const link = document.createElement('a');
 	link.className = 'file-download';
@@ -189,6 +189,7 @@ function readFiles(files) {
 // Convert file header and byte array to encoding characters and push to output queue
 function enqueueFile(type, name, bytes) {
 	encQueue.push(doublespeak.encodeFile(type, name, bytes));
+	warnSize();
 
 	// Generate file details UI
 	const textDiv = document.createElement('div');
@@ -202,7 +203,7 @@ function enqueueFile(type, name, bytes) {
 	textDiv.appendChild(remove);
 	const info = document.createElement('p');
 	info.className = 'file-info';
-	info.textContent = (type || 'unknown') + ', ' + bytes.length + ' bytes';
+	info.textContent = (type || 'unknown') + ', ' + (bytes.length / 1024).toFixed(2) + ' KB';
 	textDiv.appendChild(info);
 	textarea.outPlain.parentElement.appendChild(textDiv);
 }
@@ -213,7 +214,18 @@ function removeFile(el) {
 	const parent = textDiv.parentElement;
 	const index = Array.prototype.indexOf.call(parent.children, textDiv) - 1;
 	encQueue.splice(index, 1);
+	warnSize();
 	parent.removeChild(textDiv);
+}
+
+function warnSize() {
+	let queueSize = encQueue.reduce((len, str) => len + str.length * 3, 0);
+	let warnSize = document.getElementById('warn-size');
+	if (queueSize > 0x400000) {
+		document.getElementById('warn-size-kb').textContent = (queueSize / 1024).toFixed(2);
+		warnSize.style.display = 'block';
+	} else
+		warnSize.style.display = 'none';
 }
 
 function outputError(el, msg) {
@@ -241,6 +253,7 @@ function selectText(el) {
 
 function clearOutPlain() {
 	encQueue = [];
+	warnSize();
 	const outPlainParent = textarea.outPlain.parentElement;
 	while (outPlainParent.childNodes.length > 1)
 		outPlainParent.removeChild(outPlainParent.lastChild);

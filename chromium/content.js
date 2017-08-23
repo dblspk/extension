@@ -25,10 +25,7 @@ chrome.runtime.onConnect.addListener(port => {
 	port.onDisconnect.addListener(() => { window.port = null });
 });
 
-/**
- * Extract ciphertext from DOM string.
- * @param {String} domContent
- */
+// Extract ciphertext from DOM string.
 function extractData(domContent) {
 	output = [];
 	const dataObjs = doublespeak.decodeData(domContent);
