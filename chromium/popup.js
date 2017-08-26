@@ -25,7 +25,6 @@ document.onreadystatechange = function () {
 	});
 	textarea.outCipher.addEventListener('copy', embedData);
 	textarea.outCipher.addEventListener('dragstart', embedData);
-	textarea.inPlain.firstChild.addEventListener('focus', function () { selectText(this); });
 	document.getElementById('files').addEventListener('change', function () { readFiles(this.files); });
 	document.getElementById('clear-out-plain').addEventListener('click', clearOutPlain);
 	document.getElementById('clear-out').addEventListener('click', clearOut);
@@ -92,13 +91,13 @@ function embedData(e) {
 }
 
 function outputText(str, crcMatch) {
-	const textDiv = getTextDiv();
 	const references = {
 		'&': '&amp;',
 		'<': '&lt;',
 		'>': '&gt;'
 	};
-
+	const textDiv = getTextDiv();
+	textDiv.onfocus = function () { selectText(this); };
 	textDiv.innerHTML = autolinker.link(str.replace(/[&<>]/g, c => references[c]));
 
 	if (!crcMatch)
@@ -110,6 +109,7 @@ function outputFile(data, crcMatch) {
 
 	// Generate file details UI
 	const textDiv = getTextDiv();
+	textDiv.classList.add('file');
 	textDiv.textContent = name;
 	const info = document.createElement('p');
 	info.className = 'file-info';
@@ -120,7 +120,6 @@ function outputFile(data, crcMatch) {
 	link.href = url;
 	link.download = name;
 	link.tabIndex = -1;
-	link.textContent = 'Download';
 	textDiv.appendChild(link);
 
 	if (!crcMatch)
@@ -142,7 +141,6 @@ function getTextDiv() {
 		// Generate pseudo-textarea
 		textDiv = document.createElement('div');
 		textDiv.className = 'text-div';
-		textDiv.onfocus = function () { selectText(this); };
 		textDiv.tabIndex = -1;
 		textarea.inPlain.appendChild(textDiv);
 	}
@@ -153,7 +151,7 @@ function dragOverFiles(e) {
 	e.stopPropagation();
 	e.dataTransfer.dropEffect = 'copy';
 
-	if ((a => a[a.length - 1])(e.dataTransfer.types) === 'Files') {
+	if ((a => a[a.length - 1])(e.dataTransfer.types) == 'Files') {
 		e.preventDefault();
 		const dropTarget = document.getElementById('drop-target');
 		dropTarget.style.display = 'block';
@@ -193,7 +191,7 @@ function enqueueFile(type, name, bytes) {
 
 	// Generate file details UI
 	const textDiv = document.createElement('div');
-	textDiv.className = 'text-div';
+	textDiv.className = 'text-div file';
 	textDiv.textContent = name;
 	const remove = document.createElement('button');
 	remove.className = 'file-remove';
@@ -219,7 +217,7 @@ function removeFile(el) {
 }
 
 function warnSize() {
-	let queueSize = encQueue.reduce((len, str) => len + str.length * 3, 0);
+	let queueSize = encQueue.reduce((size, str) => size + str.length * 3, 0);
 	let warnSize = document.getElementById('warn-size');
 	if (queueSize > 0x400000) {
 		document.getElementById('warn-size-kb').textContent = (queueSize / 1024).toFixed(2);
@@ -274,6 +272,7 @@ function clearInPlain() {
 	const inPlain = textarea.inPlain;
 	inPlain.firstChild.innerHTML = '';
 	inPlain.firstChild.className = 'text-div';
+	inPlain.firstChild.onfocus = null;
 	while (inPlain.childNodes.length > 1)
 		inPlain.removeChild(inPlain.lastChild);
 }

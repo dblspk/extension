@@ -11,34 +11,34 @@
 	<input type='checkbox' id='encode-options-button'>
 	<div id='encode-options'>
 		<div class='row'>
-			<textarea id='out-prepend' placeholder='Prepend text' tabindex='-1'></textarea>
-			<textarea id='out-append' placeholder='Append text' tabindex='-1'></textarea>
+			<textarea id='out-prepend' placeholder='Prepend signature' title='Add signature (e.g. name) before secret messages' tabindex='-1'></textarea>
+			<textarea id='out-append' placeholder='Append signature' title='Add signature (e.g. name) after secret messages' tabindex='-1'></textarea>
 			<input type='file' multiple id='files'>
-			<label for='files'>FILES</label>
+			<label for='files' title='Upload file'></label>
 		</div>
 	</div>
 	<div class='row'>
 		<div style='display: inline-block'><textarea id='out-plain' placeholder='Type secret message' autofocus></textarea></div>
-		<button class='button' id='clear-out-plain' tabindex='-1'>CLEAR</button>
+		<button class='button svg clear' id='clear-out-plain' title='Clear' tabindex='-1'></button>
 	</div>
 	<div class='row'>
 		<div id='warn-size'>
 			<p>
-				<span id='warn'>&#x26A0;&#xFE0E;</span><b>LARGE MESSAGE (<span id='warn-size-kb'></span> KB)</b><br>
-				May take a long time to paste, causing applications to freeze or crash.
+				<b>LARGE MESSAGE (<span id='warn-size-kb'></span> KB)</b><br>
+				May take a long time to paste,<br>freezing or crashing applications.
 			</p>
 		</div>
 	</div>
 	<div class='row'>
 		<textarea id='out-cover' placeholder='Type cover message'></textarea>
-		<button class='button' id='clear-out' tabindex='-1'>CLEAR</button>
+		<button class='button svg clear' id='clear-out' title='Clear' tabindex='-1'></button>
 	</div>
 	<div class='row'>
 		<div style='display: inline-block'>
 			<textarea id='out-cipher' placeholder='Copy [Ctrl+C] encoded message' readonly></textarea>
 			<div class='notify copied-div'>COPIED</div>
 		</div>
-		<button class='button' id='copy-out' tabindex='-1'>COPY</button>
+		<button class='button svg copy' id='copy-out' title='Copy to clipboard' tabindex='-1'></button>
 	</div>
 	<h1>DECODE</h1>
 	<div class='row'>
