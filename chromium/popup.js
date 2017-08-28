@@ -18,6 +18,12 @@ document.onreadystatechange = function () {
 			textarea[name].addEventListener('focus', function () { this.select(); });
 	}
 
+	textarea.outPrepend.addEventListener('change', () => {
+		chrome.storage.local.set({ outPrepend: textarea.outPrepend.value });
+	});
+	textarea.outAppend.addEventListener('change', () => {
+		chrome.storage.local.set({ outAppend: textarea.outAppend.value });
+	});
 	textarea.outPlain.addEventListener('input', function () { mirrorCover(this); });
 	textarea.outCover.addEventListener('input', function () { mirrorCover(this); });
 	textarea.outCipher.addEventListener('focus', () => {
@@ -32,8 +38,29 @@ document.onreadystatechange = function () {
 	document.getElementById('drop-target').addEventListener('drop', dropFiles);
 	document.addEventListener('dragover', dragOverFiles);
 
+	chrome.storage.local.get(null, items => {
+		textarea.outPrepend.value = items.outPrepend || '';
+		textarea.outAppend.value = items.outAppend || '';
+	});
+	const background = chrome.extension.getBackgroundPage();
+	const { outPlain = '', outCover = '', encQueue = [] } = background.encDraft;
+	textarea.outPlain.value = outPlain;
+	textarea.outCover.value = outCover;
+	window.encQueue = encQueue;
+	warnEncSize();
+	for (var encFile of encQueue)
+		displayEncFile(encFile);
+
 	if (/Mac/.test(navigator.userAgent))
 		textarea.outCipher.placeholder = 'Copy [Command+C] encoded message';
+
+	window.addEventListener('unload', () => {
+		background.encDraft = {
+			outPlain: doublespeak.filterStr(textarea.outPlain.value),
+			outCover: doublespeak.filterStr(textarea.outCover.value),
+			encQueue: window.encQueue
+		};
+	});
 
 	chrome.tabs.query({ active: true, currentWindow: true }, tabs => {
 		const port = chrome.tabs.connect(tabs[0].id);
@@ -43,10 +70,10 @@ document.onreadystatechange = function () {
 			for (var obj of dataObjs)
 				switch (obj.dataType) {
 					case 0x1:
-						outputText(obj.data, obj.crcMatch);
+						outputDecText(obj.data, obj.crcMatch);
 						break;
 					case 0x2:
-						outputFile(obj.data, obj.crcMatch);
+						outputDecFile(obj.data, obj.crcMatch);
 				}
 		});
 	});
@@ -74,7 +101,7 @@ function copyText() {
 function embedData(e) {
 	const plainStr = (v => v ? v + ' ' : '')(textarea.outPrepend.value) +
 		textarea.outPlain.value + (v => v ? ' ' + v : '')(textarea.outAppend.value);
-	const encodedStr = doublespeak.encodeText(plainStr).concat(...encQueue);
+	const encodedStr = doublespeak.encodeText(plainStr) + encQueue.reduce((str, obj) => str + obj.str, '');
 	const coverStr = doublespeak.filterStr(textarea.outCover.value);
 	// Select random position in cover text to insert ciphertext
 	const insertPos = Math.floor(Math.random() * (coverStr.length - 1) + 1);
@@ -90,7 +117,7 @@ function embedData(e) {
 	flashBorder(textarea.outCipher, 'copied', 800);
 }
 
-function outputText(str, crcMatch) {
+function outputDecText(str, crcMatch) {
 	const references = {
 		'&': '&amp;',
 		'<': '&lt;',
@@ -104,7 +131,7 @@ function outputText(str, crcMatch) {
 		outputError(textDiv, 'CRC mismatch');
 }
 
-function outputFile(data, crcMatch) {
+function outputDecFile(data, crcMatch) {
 	const { type, name, url, size } = data;
 
 	// Generate file details UI
@@ -130,9 +157,7 @@ const autolinker = new Autolinker({
 	stripPrefix: false,
 	stripTrailingSlash: false,
 	hashtag: 'twitter',
-	replaceFn: function (match) {
-		return match.buildTag().setAttr('tabindex', -1);
-	}
+	replaceFn: match => match.buildTag().setAttr('tabindex', -1)
 });
 
 function getTextDiv() {
@@ -174,50 +199,58 @@ function dropFiles(e) {
 }
 
 function readFiles(files) {
-	for (var i = 0; i < files.length; i++)
+	for (var file of files)
 		(file => {
 			const reader = new FileReader();
 			reader.onload = () => {
-				enqueueFile(file.type, file.name, new Uint8Array(reader.result));
+				enqueueEncFile(file.type, file.name, new Uint8Array(reader.result));
 			};
 			reader.readAsArrayBuffer(file);
-		})(files[i]);
+		})(file);
 }
 
 // Convert file header and byte array to encoding characters and push to output queue
-function enqueueFile(type, name, bytes) {
-	encQueue.push(doublespeak.encodeFile(type, name, bytes));
-	warnSize();
+function enqueueEncFile(type, name, bytes) {
+	encQueue.push({
+		type,
+		name,
+		size: bytes.length,
+		str: doublespeak.encodeFile(type, name, bytes)
+	});
+	warnEncSize();
+	displayEncFile({ type, name, size: bytes.length });
+}
 
-	// Generate file details UI
+// Generate file details UI
+function displayEncFile({ type, name, size }) {
 	const textDiv = document.createElement('div');
 	textDiv.className = 'text-div file';
 	textDiv.textContent = name;
 	const remove = document.createElement('button');
 	remove.className = 'file-remove';
-	remove.onclick = function () { removeFile(this); };
+	remove.onclick = function () { removeEncFile(this); };
 	remove.tabIndex = -1;
 	remove.innerHTML = '&times;';
 	textDiv.appendChild(remove);
 	const info = document.createElement('p');
 	info.className = 'file-info';
-	info.textContent = (type || 'unknown') + ', ' + (bytes.length / 1024).toFixed(2) + ' KB';
+	info.textContent = (type || 'unknown') + ', ' + (size / 1024).toFixed(2) + ' KB';
 	textDiv.appendChild(info);
 	textarea.outPlain.parentElement.appendChild(textDiv);
 }
 
 // Remove file in output ciphertext embed queue
-function removeFile(el) {
+function removeEncFile(el) {
 	const textDiv = el.parentElement;
 	const parent = textDiv.parentElement;
 	const index = Array.prototype.indexOf.call(parent.children, textDiv) - 1;
 	encQueue.splice(index, 1);
-	warnSize();
+	warnEncSize();
 	parent.removeChild(textDiv);
 }
 
-function warnSize() {
-	let queueSize = encQueue.reduce((size, str) => size + str.length * 3, 0);
+function warnEncSize() {
+	let queueSize = encQueue.reduce((size, obj) => size + obj.str.length * 3, 0);
 	let warnSize = document.getElementById('warn-size');
 	if (queueSize > 0x400000) {
 		document.getElementById('warn-size-kb').textContent = (queueSize / 1024).toFixed(2);
@@ -251,7 +284,7 @@ function selectText(el) {
 
 function clearOutPlain() {
 	encQueue = [];
-	warnSize();
+	warnEncSize();
 	const outPlainParent = textarea.outPlain.parentElement;
 	while (outPlainParent.childNodes.length > 1)
 		outPlainParent.removeChild(outPlainParent.lastChild);
