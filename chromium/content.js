@@ -28,7 +28,7 @@ chrome.runtime.onConnect.addListener(port => {
 // Extract ciphertext from DOM string.
 function extractData(domContent) {
 	output = [];
-	const dataObjs = doublespeak.decodeData(domContent);
+	const dataObjs = doublespeak.decodeData(domContent).dataObjs;
 	for (var obj of dataObjs)
 		switch (obj.dataType) {
 			case 0x1:
