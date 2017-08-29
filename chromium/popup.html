@@ -18,8 +18,8 @@
 		</div>
 	</div>
 	<div class='row'>
-		<div style='display: inline-block'><textarea id='out-plain' placeholder='Type secret message' autofocus></textarea></div>
-		<button class='button svg clear' id='clear-out-plain' title='Clear' tabindex='-1'></button>
+		<textarea id='out-plain' placeholder='Type secret message' autofocus></textarea>
+		<button class='button clear' id='clear-out-plain' title='Clear' tabindex='-1'></button>
 	</div>
 	<div class='row'>
 		<div id='warn-size'>
@@ -31,14 +31,12 @@
 	</div>
 	<div class='row'>
 		<textarea id='out-cover' placeholder='Type cover message'></textarea>
-		<button class='button svg clear' id='clear-out' title='Clear' tabindex='-1'></button>
+		<button class='button clear' id='clear-out' title='Clear' tabindex='-1'></button>
 	</div>
 	<div class='row'>
-		<div style='display: inline-block'>
-			<textarea id='out-cipher' placeholder='Copy [Ctrl+C] encoded message' readonly></textarea>
-			<div class='notify copied-div'>COPIED</div>
-		</div>
-		<button class='button svg copy' id='copy-out' title='Copy to clipboard' tabindex='-1'></button>
+		<textarea id='out-cipher' placeholder='Copy [Ctrl+C] encoded message' readonly></textarea>
+		<button class='button copy' id='copy-out' title='Copy to clipboard' tabindex='-1'></button>
+		<div class='notify copied-div'>COPIED</div>
 	</div>
 	<h1>DECODE</h1>
 	<div class='row'>

@@ -46,6 +46,8 @@ document.onreadystatechange = function () {
 	const { outPlain = '', outCover = '', encQueue = [] } = background.encDraft;
 	textarea.outPlain.value = outPlain;
 	textarea.outCover.value = outCover;
+	resizeTextarea(textarea.outPlain);
+	mirrorCover(textarea.outCover);
 	window.encQueue = encQueue;
 	warnEncSize();
 	for (var encFile of encQueue)
@@ -125,7 +127,7 @@ function outputDecText(str, crcMatch) {
 	};
 	const textDiv = getTextDiv();
 	textDiv.onfocus = function () { selectText(this); };
-	textDiv.innerHTML = autolinker.link(str.replace(/[&<>]/g, c => references[c]));
+	textDiv.innerHTML = autolinker.link(str.replace(/[&<>]/g, c => references[c])) || '\uFEFF';
 
 	if (!crcMatch)
 		outputError(textDiv, 'CRC mismatch');
@@ -243,7 +245,7 @@ function displayEncFile({ type, name, size }) {
 function removeEncFile(el) {
 	const textDiv = el.parentElement;
 	const parent = textDiv.parentElement;
-	const index = Array.prototype.indexOf.call(parent.children, textDiv) - 1;
+	const index = Array.prototype.indexOf.call(parent.children, textDiv) - 4;
 	encQueue.splice(index, 1);
 	warnEncSize();
 	parent.removeChild(textDiv);
@@ -286,7 +288,7 @@ function clearOutPlain() {
 	encQueue = [];
 	warnEncSize();
 	const outPlainParent = textarea.outPlain.parentElement;
-	while (outPlainParent.childNodes.length > 1)
+	while (outPlainParent.childNodes.length > 4)
 		outPlainParent.removeChild(outPlainParent.lastChild);
 	textarea.outPlain.value = '';
 	resizeTextarea(textarea.outPlain);
