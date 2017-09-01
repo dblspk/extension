@@ -39,7 +39,7 @@ document.onreadystatechange = function () {
 	document.getElementById('clear-out-plain').addEventListener('click', clearOutPlain);
 	document.getElementById('clear-out').addEventListener('click', clearOut);
 	document.getElementById('copy-out').addEventListener('click', copyText);
-	document.getElementById('toggle-auto').addEventListener('change', () => { setIsAuto(!window.isAuto) });
+	document.getElementById('toggle-auto').addEventListener('change', () => { setIsAuto(!window.isAuto); });
 	document.getElementById('clear-in').addEventListener('click', clearIn);
 	document.getElementById('drop-target').addEventListener('drop', dropFiles);
 	document.addEventListener('dragover', dragOverFiles);
@@ -69,7 +69,6 @@ document.onreadystatechange = function () {
 	chrome.tabs.query({ active: true, currentWindow: true }, tabs => {
 		window.port = chrome.tabs.connect(tabs[0].id);
 		window.port.onMessage.addListener(dataObjs => {
-			if (!window.isAuto) return;
 			clearInPlain();
 			for (var obj of dataObjs)
 				switch (obj.dataType) {
@@ -83,7 +82,7 @@ document.onreadystatechange = function () {
 		chrome.storage.local.get(null, items => {
 			textarea.outPrepend.value = items.outPrepend || '';
 			textarea.outAppend.value = items.outAppend || '';
-			setIsAuto(items.isAuto);
+			setIsAuto(items.isAuto || items.isAuto === undefined);
 		});
 	});
 };
@@ -325,15 +324,18 @@ function selectText(el) {
 	selection.addRange(range);
 }
 
-function setIsAuto(isAuto = true) {
+function setIsAuto(isAuto) {
 	window.isAuto = isAuto;
 	chrome.storage.local.set({ isAuto });
+	// Update background script
+	chrome.runtime.sendMessage(isAuto);
+	// Update active tab
+	window.port.postMessage(isAuto);
 	document.getElementById('toggle-auto').checked = isAuto;
 	textarea.inCipher.parentElement.style.display = isAuto ? 'none' : 'block';
-	if (isAuto) {
+	if (isAuto)
 		textarea.inCipher.value = '';
-		window.port.postMessage('');
-	} else {
+	else {
 		resizeTextarea(textarea.inCipher);
 		clearInPlain();
 	}
