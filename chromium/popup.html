@@ -11,8 +11,8 @@
 	<input type='checkbox' id='encode-options-button'>
 	<div id='encode-options'>
 		<div class='row'>
-			<textarea id='out-prepend' placeholder='Prepend signature' title='Add signature (e.g. name) before secret messages' tabindex='-1'></textarea>
-			<textarea id='out-append' placeholder='Append signature' title='Add signature (e.g. name) after secret messages' tabindex='-1'></textarea>
+			<textarea id='out-prepend' placeholder='Prepend' title='Add signature (e.g. name) before secret messages' tabindex='-1'></textarea>
+			<textarea id='out-append' placeholder='Append' title='Add signature (e.g. name) after secret messages' tabindex='-1'></textarea>
 			<input type='file' multiple id='files'>
 			<label for='files' title='Upload files'></label>
 		</div>
@@ -38,7 +38,11 @@
 		<button class='button copy' id='copy-out' title='Copy to clipboard' tabindex='-1'></button>
 		<div class='notify copied-div'>COPIED</div>
 	</div>
-	<h1>DECODE</h1>
+	<h1>DECODE<input type='checkbox' id='toggle-auto'><label for='toggle-auto'></label></h1>
+	<div class='row'>
+		<textarea id='in-cipher' maxlength='0' placeholder='Paste [Ctrl+V] to decode message' required></textarea>
+		<button class='button clear' id='clear-in' title='Clear' tabindex='-1'></button>
+	</div>
 	<div class='row'>
 		<div id='in-plain'><div class='text-div' tabindex='-1'></div></div>
 	</div>

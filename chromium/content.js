@@ -20,9 +20,9 @@ new MutationObserver(() => {
 
 // Listen for connections from popup
 chrome.runtime.onConnect.addListener(port => {
-	port.postMessage(output);
 	window.port = port;
-	port.onDisconnect.addListener(() => { window.port = null });
+	port.onMessage.addListener(() => { port.postMessage(output); });
+	port.onDisconnect.addListener(() => { window.port = null; });
 });
 
 // Extract ciphertext from DOM string.

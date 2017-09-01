@@ -1,4 +1,4 @@
-const doublespeak = new Doublespeak();
+const doublespeak = new Doublespeak(true);
 var encQueue = [];
 var textarea = [];
 
@@ -9,12 +9,13 @@ document.onreadystatechange = function () {
 		'out-plain',
 		'out-cover',
 		'out-cipher',
+		'in-cipher',
 		'in-plain'
 	];
-	for (var i = 0; i < 6; i++) {
+	for (var i = 0; i < 7; i++) {
 		let name = textareas[i].replace(/-([a-z])/, (m, c) => c.toUpperCase());
 		textarea[name] = document.getElementById(textareas[i]);
-		if (i < 5)
+		if (i < 4 || i == 5)
 			textarea[name].addEventListener('focus', function () { this.select(); });
 	}
 
@@ -31,17 +32,18 @@ document.onreadystatechange = function () {
 	});
 	textarea.outCipher.addEventListener('copy', embedData);
 	textarea.outCipher.addEventListener('dragstart', embedData);
+	textarea.inCipher.addEventListener('paste', extractData);
+	textarea.inCipher.addEventListener('drop', extractData);
+	textarea.inCipher.addEventListener('input', checkEmpty);
 	document.getElementById('files').addEventListener('change', function () { readFiles(this.files); });
 	document.getElementById('clear-out-plain').addEventListener('click', clearOutPlain);
 	document.getElementById('clear-out').addEventListener('click', clearOut);
 	document.getElementById('copy-out').addEventListener('click', copyText);
+	document.getElementById('toggle-auto').addEventListener('change', () => { setIsAuto(!window.isAuto) });
+	document.getElementById('clear-in').addEventListener('click', clearIn);
 	document.getElementById('drop-target').addEventListener('drop', dropFiles);
 	document.addEventListener('dragover', dragOverFiles);
 
-	chrome.storage.local.get(null, items => {
-		textarea.outPrepend.value = items.outPrepend || '';
-		textarea.outAppend.value = items.outAppend || '';
-	});
 	const background = chrome.extension.getBackgroundPage();
 	const { outPlain = '', outCover = '', encQueue = [] } = background.encDraft;
 	textarea.outPlain.value = outPlain;
@@ -65,9 +67,8 @@ document.onreadystatechange = function () {
 	});
 
 	chrome.tabs.query({ active: true, currentWindow: true }, tabs => {
-		const port = chrome.tabs.connect(tabs[0].id);
-		port.postMessage('');
-		port.onMessage.addListener(dataObjs => {
+		window.port = chrome.tabs.connect(tabs[0].id);
+		window.port.onMessage.addListener(dataObjs => {
 			clearInPlain();
 			for (var obj of dataObjs)
 				switch (obj.dataType) {
@@ -77,6 +78,11 @@ document.onreadystatechange = function () {
 					case 0x2:
 						outputDecFile(obj.data, obj.crcMatch);
 				}
+		});
+		chrome.storage.local.get(null, items => {
+			textarea.outPrepend.value = items.outPrepend || '';
+			textarea.outAppend.value = items.outAppend || '';
+			setIsAuto(items.isAuto);
 		});
 	});
 };
@@ -119,6 +125,34 @@ function embedData(e) {
 	flashBorder(textarea.outCipher, 'copied', 800);
 }
 
+// Extract input ciphertext
+function extractData(e) {
+	e.preventDefault();
+	// Hijack paste/drop event to extract clipboard contents
+	const str = e.type == 'paste' ?
+		e.clipboardData.getData('text/plain') :
+		e.dataTransfer.getData('text/plain');
+
+	// Filter out ciphertext before "pasting" to avert
+	// reflow performance cost with large messages
+	const { cover, dataObjs } = doublespeak.decodeData(str);
+	clearInPlain();
+	textarea.inCipher.value = cover || '\uFEFF';
+	resizeTextarea(textarea.inCipher);
+
+	for (var obj of dataObjs)
+		switch (obj.dataType) {
+			case 0x1:
+				outputDecText(doublespeak.extractText(obj.data), obj.crcMatch);
+				break;
+			case 0x2:
+				outputDecFile(doublespeak.extractFile(obj.data), obj.crcMatch);
+				break;
+			default:
+				outputError(getTextDiv(), obj.error, obj.details);
+		}
+}
+
 function outputDecText(str, crcMatch) {
 	const references = {
 		'&': '&amp;',
@@ -127,7 +161,7 @@ function outputDecText(str, crcMatch) {
 	};
 	const textDiv = getTextDiv();
 	textDiv.onfocus = function () { selectText(this); };
-	textDiv.innerHTML = autolinker.link(str.replace(/[&<>]/g, c => references[c])) || '\uFEFF';
+	textDiv.innerHTML = autolinker.link(str.replace(/[&<>]/g, c => references[c]));
 
 	if (!crcMatch)
 		outputError(textDiv, 'CRC mismatch');
@@ -211,7 +245,7 @@ function readFiles(files) {
 		})(file);
 }
 
-// Convert file header and byte array to encoding characters and push to output queue
+// Convert file header and byte array to encoding characters and push to output file queue
 function enqueueEncFile(type, name, bytes) {
 	encQueue.push({
 		type,
@@ -223,7 +257,7 @@ function enqueueEncFile(type, name, bytes) {
 	displayEncFile({ type, name, size: bytes.length });
 }
 
-// Generate file details UI
+// Generate output file details UI
 function displayEncFile({ type, name, size }) {
 	const textDiv = document.createElement('div');
 	textDiv.className = 'text-div file';
@@ -241,7 +275,7 @@ function displayEncFile({ type, name, size }) {
 	textarea.outPlain.parentElement.appendChild(textDiv);
 }
 
-// Remove file in output ciphertext embed queue
+// Remove file from output file queue
 function removeEncFile(el) {
 	const textDiv = el.parentElement;
 	const parent = textDiv.parentElement;
@@ -254,6 +288,7 @@ function removeEncFile(el) {
 function warnEncSize() {
 	let queueSize = encQueue.reduce((size, obj) => size + obj.str.length * 3, 0);
 	let warnSize = document.getElementById('warn-size');
+	// Warn if output file queue is over 4 MB
 	if (queueSize > 0x400000) {
 		document.getElementById('warn-size-kb').textContent = (queueSize / 1024).toFixed(2);
 		warnSize.style.display = 'block';
@@ -276,12 +311,31 @@ function flashBorder(el, style, ms) {
 	}, ms);
 }
 
+function checkEmpty() {
+	if (textarea.inCipher.value == '')
+		clearIn();
+}
+
 function selectText(el) {
 	const range = document.createRange();
 	const selection = window.getSelection();
 	range.selectNodeContents(el);
 	selection.removeAllRanges();
 	selection.addRange(range);
+}
+
+function setIsAuto(isAuto = true) {
+	window.isAuto = isAuto;
+	chrome.storage.local.set({ isAuto });
+	document.getElementById('toggle-auto').checked = isAuto;
+	textarea.inCipher.parentElement.style.display = isAuto ? 'none' : 'block';
+	if (isAuto) {
+		textarea.inCipher.value = '';
+		window.port.postMessage('');
+	} else {
+		resizeTextarea(textarea.inCipher);
+		clearInPlain();
+	}
 }
 
 function clearOutPlain() {
@@ -301,6 +355,13 @@ function clearOut() {
 	resizeTextarea(textarea.outCover);
 	resizeTextarea(textarea.outCipher);
 	textarea.outCover.focus();
+}
+
+function clearIn() {
+	clearInPlain();
+	textarea.inCipher.value = '';
+	resizeTextarea(textarea.inCipher);
+	textarea.inCipher.focus();
 }
 
 function clearInPlain() {

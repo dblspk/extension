@@ -1,8 +1,8 @@
 {
 	"manifest_version": 2,
 	"name": "Doublespeak",
-	"description": "Encodes/decodes messages as zero-width Unicode characters in text, as a casual form of steganography. Optimized for real time chat.",
-	"version": "2017.8.27",
+	"description": "Hides/reveals secret messages in text. Optimized for instant messaging.",
+	"version": "2017.8.31",
 	"icons": {
 		"192": "images/icon-192.png"
 	},
@@ -11,7 +11,6 @@
 	},
 	"content_scripts": [{
 		"matches": ["<all_urls>"],
-		"all_frames": true,
 		"js": [
 			"lib/doublespeak.min.js",
 			"content.js"
@@ -21,8 +20,5 @@
 		"default_icon": "images/icon-192.png",
 		"default_popup": "popup.html"
 	},
-	"permissions": [
-		"clipboardWrite",
-		"storage"
-	]
+	"permissions": ["storage"]
 }
