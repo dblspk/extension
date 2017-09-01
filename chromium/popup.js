@@ -332,7 +332,9 @@ function setIsAuto(isAuto) {
 	// Update background script
 	chrome.runtime.sendMessage(isAuto);
 	// Update active tab
-	window.port.postMessage(isAuto);
+	try {
+		window.port.postMessage(isAuto);
+	} catch (e) {}
 	document.getElementById('toggle-auto').checked = isAuto;
 	textarea.inCipher.parentElement.style.display = isAuto ? 'none' : 'block';
 	if (isAuto)
