@@ -69,6 +69,7 @@ document.onreadystatechange = function () {
 	chrome.tabs.query({ active: true, currentWindow: true }, tabs => {
 		window.port = chrome.tabs.connect(tabs[0].id);
 		window.port.onMessage.addListener(dataObjs => {
+			if (!window.isAuto) return;
 			clearInPlain();
 			for (var obj of dataObjs)
 				switch (obj.dataType) {
