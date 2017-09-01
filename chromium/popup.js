@@ -55,8 +55,10 @@ document.onreadystatechange = function () {
 	for (var encFile of encQueue)
 		displayEncFile(encFile);
 
-	if (/Mac/.test(navigator.userAgent))
+	if (/Mac/.test(navigator.userAgent)) {
 		textarea.outCipher.placeholder = 'Copy [Command+C] encoded message';
+		textarea.inCipher.placeholder = 'Paste [Command+V] to decode message';
+	}
 
 	window.addEventListener('unload', () => {
 		background.encDraft = {
