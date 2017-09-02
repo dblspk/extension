@@ -10,6 +10,8 @@ Chrome extension: __[Chrome Web Store](https://chrome.google.com/webstore/detail
 
 Web app: __http://dblspk.io/__
 
+![screenshot](https://lh3.googleusercontent.com/QyUaIAfS6luoccbj5xVFfTHZCE8KnHW21eWUtoai2yzHtfsDxelCSoANXiDB_uK_IRniVMMv=w640-h400-e365)
+
 ## Usage
 
 ###### Extension
@@ -20,11 +22,11 @@ Encoded message is automatically copied by tabbing to or clicking on the field.
 
 Drag and drop files onto popup to encode.
 
-When auto mode is enabled, this extension automatically parses the HTML in your current tab for secret messages. This feature requires the permission "Read and change all your data on the websites you visit". If you do not trust this extension, you can manually decode using the web app.
+When auto mode is enabled, this extension automatically parses the HTML in your current tab for secret messages. __This feature requires the permission "Read and change all your data on the websites you visit".__ If you do not trust this extension, you can manually decode using the web app.
 
 ## Features
 
-* Option to automatically parse the HTML in current tab for secret messages
+* Option to automatically parse web pages for secret messages
 * File transmission
 * [CRC-32](https://en.wikipedia.org/wiki/Cyclic_redundancy_check) error checking
 * Multi-message decoding
