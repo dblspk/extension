@@ -14,7 +14,7 @@ chrome.runtime.sendMessage('', isAuto => {
 		// Rate limit extraction
 		if (hasChanged) return;
 		hasChanged = true;
-		if (document.hidden || !isAuto) return;
+		if (document.hidden || !window.isAuto) return;
 		setTimeout(() => {
 			extractData(document.documentElement.outerHTML);
 		}, 1000);
