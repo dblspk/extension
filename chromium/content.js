@@ -1,6 +1,6 @@
 const doublespeak = new Doublespeak();
 var output;
-var isAuto = true;
+var isAuto;
 var hasChanged = false;
 
 // Check auto/manual mode on load
@@ -8,6 +8,22 @@ chrome.runtime.sendMessage('', isAuto => {
 	window.isAuto = isAuto;
 	if (isAuto)
 		extractData(document.documentElement.outerHTML);
+
+	// Parse DOM on change
+	new MutationObserver(() => {
+		// Rate limit extraction
+		if (hasChanged) return;
+		hasChanged = true;
+		if (document.hidden || !isAuto) return;
+		setTimeout(() => {
+			extractData(document.documentElement.outerHTML);
+		}, 1000);
+	}).observe(document, {
+		childList: true,
+		attributes: true,
+		characterData: true,
+		subtree: true
+	});
 });
 
 // Listen for connections from popup
@@ -37,27 +53,15 @@ document.addEventListener('visibilitychange', () => {
 	});
 });
 
-// Parse DOM on change
-new MutationObserver(() => {
-	// Rate limit extraction
-	if (hasChanged) return;
-	hasChanged = true;
-	if (document.hidden || !isAuto) return;
-	setTimeout(() => {
-		extractData(document.documentElement.outerHTML);
-	}, 1000);
-}).observe(document, {
-	childList: true,
-	attributes: true,
-	characterData: true,
-	subtree: true
-});
-
 // Extract ciphertext from DOM string
 function extractData(domContent) {
 	hasChanged = false;
 	output = [];
-	const dataObjs = doublespeak.decodeData(domContent).dataObjs;
+	let dataObjs = doublespeak.decodeData(domContent).dataObjs;
+
+	let crc = {};
+	dataObjs = dataObjs.filter(obj => crc.hasOwnProperty(obj.crc) ? false : crc[obj.crc] = true);
+
 	for (var obj of dataObjs)
 		switch (obj.dataType) {
 			case 0x1:
