@@ -131,9 +131,9 @@ function embedData(e) {
 function extractData(e) {
 	e.preventDefault();
 	// Hijack paste/drop event to extract clipboard contents
-	const str = e.type == 'paste' ?
-		e.clipboardData.getData('text/plain') :
-		e.dataTransfer.getData('text/plain');
+	const str = e.type == 'paste'
+		? e.clipboardData.getData('text/plain')
+		: e.dataTransfer.getData('text/plain');
 
 	// Filter out ciphertext before "pasting" to avert
 	// reflow performance cost with large messages

@@ -59,6 +59,7 @@ function extractData(domContent) {
 	output = [];
 	let dataObjs = doublespeak.decodeData(domContent).dataObjs;
 
+	// Deduplicate payloads
 	let crc = {};
 	dataObjs = dataObjs.filter(obj => crc.hasOwnProperty(obj.crc) ? false : crc[obj.crc] = true);
 

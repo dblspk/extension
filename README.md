@@ -8,7 +8,7 @@ Messages are encoded as zero-width Unicode characters, as a casual form of [steg
 
 Chrome extension: __[Chrome Web Store](https://chrome.google.com/webstore/detail/doublespeak/mochgllkkbafaoombocojfenmkbijhdb)__
 
-Web app: __http://dblspk.io/__
+Web app: __https://dblspk.io/__
 
 ![screenshot](https://lh3.googleusercontent.com/QyUaIAfS6luoccbj5xVFfTHZCE8KnHW21eWUtoai2yzHtfsDxelCSoANXiDB_uK_IRniVMMv=w640-h400-e365)
 
@@ -26,7 +26,7 @@ When auto mode is enabled, this extension automatically parses the HTML in your 
 
 ## Features
 
-* Option to automatically parse web pages for secret messages
+* Automatically parse web pages for secret messages (optional)
 * File transmission
 * [CRC-32](https://en.wikipedia.org/wiki/Cyclic_redundancy_check) error checking
 * Multi-message decoding
